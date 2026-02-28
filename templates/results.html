@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results &mdash; YouTube Comment Mood Check</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>&#127909; Analysis Results</h1>
+        </header>
+
+        <!-- Video card -->
+        <div class="video-card">
+            {% if video_thumbnail %}
+            <a href="{{ video_url }}" target="_blank" rel="noopener" class="video-thumb-link">
+                <img src="{{ video_thumbnail }}" alt="Video thumbnail" class="video-thumb">
+                <span class="play-icon">&#9654;</span>
+            </a>
+            {% endif %}
+            <div class="video-info">
+                {% if video_title %}
+                <h2 class="video-title">
+                    <a href="{{ video_url }}" target="_blank" rel="noopener">{{ video_title }}</a>
+                </h2>
+                {% endif %}
+                <p class="video-url">
+                    <a href="{{ video_url }}" target="_blank" rel="noopener">{{ video_url }}</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Comment count note -->
+        <div class="count-note">
+            &#8505;&#65039; The count shown here may differ slightly from YouTube's displayed total. YouTube includes deleted, spam-filtered, and held-for-review comments in its counter, which are not accessible via the API.
+        </div>
+
+        <!-- Feedback hint -->
+        <div class="feedback-hint">
+            &#128161; <strong>Train the model:</strong> Click any sentiment badge to correct it. Your corrections are saved and used in future analyses.
+        </div>
+
+        <!-- Sentiment bar chart -->
+        {% if total > 0 %}
+        <div class="sentiment-bar">
+            {% if positive > 0 %}
+                <div class="bar-segment bar-positive" style="width: {{ (positive / total * 100) | round(1) }}%">
+                    {{ (positive / total * 100) | round(1) }}%
+                </div>
+            {% endif %}
+            {% if neutral > 0 %}
+                <div class="bar-segment bar-neutral" style="width: {{ (neutral / total * 100) | round(1) }}%">
+                    {{ (neutral / total * 100) | round(1) }}%
+                </div>
+            {% endif %}
+            {% if negative > 0 %}
+                <div class="bar-segment bar-negative" style="width: {{ (negative / total * 100) | round(1) }}%">
+                    {{ (negative / total * 100) | round(1) }}%
+                </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Filter bar -->
+        <div class="filter-bar" role="group" aria-label="Filter comments by sentiment">
+            <button class="filter-btn active" data-filter="ALL"   onclick="applyFilter('ALL')">All <span class="filter-count" id="fc-all">{{ total }}</span></button>
+            <button class="filter-btn positive" data-filter="POSITIVE" onclick="applyFilter('POSITIVE')">&#128077; Positive <span class="filter-count" id="fc-positive">{{ positive }}</span></button>
+            <button class="filter-btn negative" data-filter="NEGATIVE" onclick="applyFilter('NEGATIVE')">&#128078; Negative <span class="filter-count" id="fc-negative">{{ negative }}</span></button>
+            <button class="filter-btn neutral"  data-filter="NEUTRAL"  onclick="applyFilter('NEUTRAL')">&#8213; Neutral <span class="filter-count" id="fc-neutral">{{ neutral }}</span></button>
+        </div>
+
+        <p class="no-results hidden" id="no-results">No comments match this filter.</p>
+
+        <!-- Comment cards -->
+        <section class="comments">
+            {% for item in results %}
+                <div class="comment-card {{ item.sentiment | lower }}" id="card-{{ loop.index0 }}" data-comment="{{ item.comment | e }}" data-sentiment="{{ item.sentiment }}">
+                    <div class="card-header">
+                        <span class="badge" title="Click to change sentiment" onclick="openCorrector({{ loop.index0 }})">{{ item.sentiment }}</span>
+                        {% if item.source == 'feedback' %}
+                            <span class="source-tag">&#10003; corrected</span>
+                        {% elif item.source == 'keyword' %}
+                            <span class="source-tag">&#9881; keyword</span>
+                        {% endif %}
+                        <!-- Correction buttons (hidden by default) -->
+                        <div class="corrector hidden" id="corrector-{{ loop.index0 }}">
+                            <button class="corr-btn corr-positive" onclick="correct({{ loop.index0 }}, 'POSITIVE')">Positive</button>
+                            <button class="corr-btn corr-negative" onclick="correct({{ loop.index0 }}, 'NEGATIVE')">Negative</button>
+                            <button class="corr-btn corr-neutral" onclick="correct({{ loop.index0 }}, 'NEUTRAL')">Neutral</button>
+                            <button class="corr-btn corr-cancel" onclick="closeCorrector({{ loop.index0 }})">&#10005;</button>
+                        </div>
+                    </div>
+                    <p class="comment-text">{{ item.comment }}</p>
+                </div>
+            {% endfor %}
+        </section>
+
+        <div class="actions">
+            <a href="{{ url_for('index') }}" class="btn">&#8592; Analyse Another Video</a>
+        </div>
+
+        <footer>
+            <p>Built with Flask &amp; Selenium &bull; Sentiment by RoBERTa + your feedback</p>
+        </footer>
+    </div>
+
+    <script>
+        function openCorrector(idx) {
+            document.getElementById('corrector-' + idx).classList.remove('hidden');
+        }
+
+        function closeCorrector(idx) {
+            document.getElementById('corrector-' + idx).classList.add('hidden');
+        }
+
+        function correct(idx, newSentiment) {
+            const card = document.getElementById('card-' + idx);
+            const comment = card.getAttribute('data-comment');
+            const oldSentiment = card.getAttribute('data-sentiment');
+
+            // Send correction to backend
+            fetch('/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment: comment, sentiment: newSentiment })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.ok) {
+                    // Update the card visually
+                    card.classList.remove('positive', 'negative', 'neutral');
+                    card.classList.add(newSentiment.toLowerCase());
+                    card.setAttribute('data-sentiment', newSentiment);
+                    card.querySelector('.badge').textContent = newSentiment;
+
+                    // Add/update source tag
+                    let sourceTag = card.querySelector('.source-tag');
+                    if (!sourceTag) {
+                        sourceTag = document.createElement('span');
+                        sourceTag.className = 'source-tag';
+                        card.querySelector('.card-header').insertBefore(
+                            sourceTag, card.querySelector('.corrector')
+                        );
+                    }
+                    sourceTag.innerHTML = '&#10003; corrected';
+
+                    // Update counters
+                    updateCounters(oldSentiment, newSentiment);
+                    closeCorrector(idx);
+                }
+            })
+            .catch(err => console.error('Feedback error:', err));
+        }
+
+        function updateCounters(oldS, newS) {
+            const filterIds = { POSITIVE: 'fc-positive', NEGATIVE: 'fc-negative', NEUTRAL: 'fc-neutral' };
+
+            const decEl = document.getElementById(filterIds[oldS]);
+            if (decEl) decEl.textContent = Math.max(0, parseInt(decEl.textContent) - 1);
+            const incEl = document.getElementById(filterIds[newS]);
+            if (incEl) incEl.textContent = parseInt(incEl.textContent) + 1;
+
+            // Update "All" count badge
+            const allEl = document.getElementById('fc-all');
+            if (allEl) allEl.textContent = document.querySelectorAll('.comment-card').length;
+
+            // Re-apply current filter so card visibility stays correct
+            applyFilter(currentFilter);
+        }
+
+        let currentFilter = 'ALL';
+
+        function applyFilter(filter) {
+            currentFilter = filter;
+
+            // Toggle active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+
+            // Show / hide cards
+            let visible = 0;
+            document.querySelectorAll('.comment-card').forEach(card => {
+                const match = filter === 'ALL' || card.dataset.sentiment === filter;
+                card.classList.toggle('hidden', !match);
+                if (match) visible++;
+            });
+
+            document.getElementById('no-results').classList.toggle('hidden', visible > 0);
+        }
+    </script>
+</body>
+</html>
