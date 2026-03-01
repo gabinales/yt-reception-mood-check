@@ -1,6 +1,6 @@
-# YouTube Comment Section Mood Check
+# YouTube Reception Mood Check
 
-A web application that scrapes YouTube video comments and performs sentiment analysis to gauge the overall mood of the comment section. Comments are classified as **Positive**, **Negative**, or **Neutral** and displayed with color-coded backgrounds for quick visual insight.
+A web application that scrapes YouTube video comments and performs sentiment analysis to gauge the overall mood of the reception. Comments are classified as **Positive**, **Negative**, or **Neutral** and displayed with color-coded backgrounds for quick visual insight.
 
 ---
 

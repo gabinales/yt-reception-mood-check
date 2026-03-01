@@ -1,9 +1,12 @@
 """
 analyzer.py
 -----------
-Comment cleaning and sentiment analysis using a transformer model
-(cardiffnlp/twitter-roberta-base-sentiment-latest) **combined with
-a local feedback/correction store**.
+Comment cleaning and sentiment analysis using a multilingual transformer
+(cardiffnlp/twitter-xlm-roberta-base-sentiment-multilingual) **combined
+with a local feedback/correction store**.
+
+The model understands English, Portuguese (BR), Spanish, French, German,
+Italian, Arabic and Hindi.
 
 Priority order for each comment:
 1. Exact-match correction from feedback store → use directly.
@@ -15,11 +18,14 @@ import re
 from transformers import pipeline
 from feedback import get_correction, get_keyword_hint
 
+# Multilingual XLM-RoBERTa trained on ~198 M tweets in 8 languages
+_MODEL = "cardiffnlp/twitter-xlm-roberta-base-sentiment-multilingual"
+
 # Load the sentiment-analysis pipeline once at module level.
 _classifier = pipeline(
     "sentiment-analysis",
-    model="cardiffnlp/twitter-roberta-base-sentiment-latest",
-    tokenizer="cardiffnlp/twitter-roberta-base-sentiment-latest",
+    model=_MODEL,
+    tokenizer=_MODEL,
     top_k=1,
     truncation=True,
     max_length=512,

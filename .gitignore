@@ -60,6 +60,10 @@ cover/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+feedback.db
+feedback.db-wal
+feedback.db-shm
+feedback_data.json
 
 # Flask stuff:
 instance/

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About &mdash; YouTube Reception Mood Check</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container page-simple">
+        <header>
+            <h1>&#128220; About</h1>
+        </header>
+
+        <section class="prose">
+            <h2>What is YouTube Reception Mood Check?</h2>
+            <p>
+                YouTube Reception Mood Check is a free tool that lets you instantly
+                understand how people feel about a YouTube video. Paste any video URL,
+                and the app scrapes every accessible comment, runs each one through a
+                multilingual AI sentiment model, and presents a clear visual breakdown
+                of positive, negative, and neutral reactions.
+            </p>
+
+            <h2>How it works</h2>
+            <ol>
+                <li><strong>Scraping</strong> &mdash; We use <em>yt-dlp</em> to talk
+                    directly to YouTube&rsquo;s internal API, capturing every top-level
+                    comment and reply that is publicly visible.</li>
+                <li><strong>Sentiment analysis</strong> &mdash; Each comment is classified
+                    by a multilingual XLM-RoBERTa transformer model trained on ~198&nbsp;million
+                    tweets across eight languages, including Brazilian Portuguese and English.</li>
+                <li><strong>User corrections</strong> &mdash; Disagree with a label?
+                    Click any sentiment badge to correct it. Your feedback is saved
+                    locally and used to improve future analyses.</li>
+            </ol>
+
+            <h2>Tech stack</h2>
+            <ul>
+                <li><strong>Back-end:</strong> Python &middot; Flask</li>
+                <li><strong>Scraping:</strong> yt-dlp (YouTube InnerTube API)</li>
+                <li><strong>AI model:</strong> HuggingFace Transformers &middot; cardiffnlp/twitter-xlm-roberta-base-sentiment-multilingual</li>
+                <li><strong>Front-end:</strong> Vanilla HTML / CSS / JS</li>
+            </ul>
+
+            <h2>Contact</h2>
+            <p>
+                <!-- TODO: edit with your real contact info -->
+                Created by <strong>Your Name</strong><br>
+                Email: <a href="mailto:you@example.com">you@example.com</a><br>
+                GitHub: <a href="https://github.com/youruser" target="_blank" rel="noopener">github.com/youruser</a>
+            </p>
+        </section>
+
+        <div class="actions">
+            <a href="{{ url_for('index') }}" class="btn">&larr; Back to Home</a>
+        </div>
+
+        <footer class="site-footer">
+            <p>&copy; 2026 YouTube Reception Mood Check</p>
+            <nav class="footer-links">
+                <a href="{{ url_for('about') }}">About</a>
+                <span class="sep">&bull;</span>
+                <a href="{{ url_for('privacy') }}">Terms &amp; Privacy</a>
+            </nav>
+        </footer>
+    </div>
+</body>
+</html>

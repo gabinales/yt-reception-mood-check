@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms &amp; Privacy &mdash; YouTube Reception Mood Check</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container page-simple">
+        <header>
+            <h1>&#128274; Terms &amp; Privacy</h1>
+        </header>
+
+        <section class="prose">
+            <h2>Terms of Use</h2>
+            <p>
+                YouTube Reception Mood Check is provided <strong>&ldquo;as&nbsp;is&rdquo;</strong>
+                for personal and educational purposes. You may use it freely to analyse
+                publicly available YouTube comments. We make no warranties regarding
+                accuracy, availability, or fitness for any particular purpose.
+            </p>
+            <ul>
+                <li>Do not use this tool to harass, stalk, or target individuals.</li>
+                <li>All comments shown are public data fetched from YouTube; we do not
+                    host or redistribute them.</li>
+                <li>We reserve the right to modify or discontinue the service at any time.</li>
+            </ul>
+
+            <h2>Privacy Policy</h2>
+            <h3>What we collect</h3>
+            <p>
+                We <strong>do not</strong> collect personal data, set cookies, or use
+                third-party analytics trackers.
+            </p>
+            <ul>
+                <li><strong>Video URLs</strong> you submit are processed in-memory and
+                    are not logged or stored on any server.</li>
+                <li><strong>Sentiment corrections</strong> you make are saved in a local
+                    JSON file on the machine running the app. They are never transmitted
+                    to any external service.</li>
+            </ul>
+
+            <h3>Third-party services</h3>
+            <ul>
+                <li><strong>YouTube / Google</strong> &mdash; comments are fetched via
+                    YouTube&rsquo;s InnerTube API through <em>yt-dlp</em>. Your IP
+                    address is visible to YouTube during this request.</li>
+                <li><strong>Hugging Face</strong> &mdash; the AI model is downloaded once
+                    from Hugging Face Hub and cached locally. No comment data is sent to
+                    Hugging Face.</li>
+            </ul>
+
+            <h3>Data retention</h3>
+            <p>
+                Analysis results exist only for the duration of the HTTP response. Once
+                you close or navigate away from the results page, the data is gone. Only
+                user-submitted sentiment corrections persist locally.
+            </p>
+        </section>
+
+        <div class="actions">
+            <a href="{{ url_for('index') }}" class="btn">&larr; Back to Home</a>
+        </div>
+
+        <footer class="site-footer">
+            <p>&copy; 2026 YouTube Reception Mood Check</p>
+            <nav class="footer-links">
+                <a href="{{ url_for('about') }}">About</a>
+                <span class="sep">&bull;</span>
+                <a href="{{ url_for('privacy') }}">Terms &amp; Privacy</a>
+            </nav>
+        </footer>
+    </div>
+</body>
+</html>

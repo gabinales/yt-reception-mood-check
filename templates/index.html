@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Comment Mood Check</title>
+    <title>YouTube Reception Mood Check</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>&#127909; YouTube Comment Mood Check</h1>
-            <p class="subtitle">Paste a video URL and discover the mood of the comment section</p>
+            <h1>&#127909; YouTube Reception Mood Check</h1>
+            <p class="subtitle">Paste a video URL and discover the mood of the reception</p>
         </header>
 
         <!-- Flash messages -->
@@ -43,14 +43,30 @@
             <!-- Loading spinner (hidden by default) -->
             <div id="loading" class="loading hidden">
                 <div class="spinner"></div>
-                <p>Scraping &amp; analysing comments &mdash; this may take a moment&hellip;</p>
+                <p class="loading-main">Scraping &amp; analysing comments&hellip;</p>
+                <p class="loading-timer">Elapsed: <span id="elapsed">0:00</span></p>
+                <div class="loading-estimate">
+                    <p>&#9200; Typical wait times:</p>
+                    <ul>
+                        <li>~100 comments &rarr; under 1 min</li>
+                        <li>~500 comments &rarr; ~4 min</li>
+                        <li>~1 000 comments &rarr; ~8 min</li>
+                        <li>~5 000 comments &rarr; ~40 min</li>
+                    </ul>
+                    <p class="loading-relax">&#9749; Now relax, and come back later to see the results.</p>
+                </div>
             </div>
         </main>
 
-        <footer>
-            <p>Built with Flask &amp; Selenium &bull; Sentiment by RoBERTa + your feedback</p>
+        <footer class="site-footer">
+            <p>&copy; 2026 YouTube Reception Mood Check</p>
+            <nav class="footer-links">
+                <a href="{{ url_for('about') }}">About</a>
+                <span class="sep">&bull;</span>
+                <a href="{{ url_for('privacy') }}">Terms &amp; Privacy</a>
+            </nav>
             {% if feedback_stats and feedback_stats.total_corrections > 0 %}
-                <p style="margin-top:0.5rem; font-size:0.8rem; color:#6b7280;">
+                <p class="footer-stats">
                     &#128218; {{ feedback_stats.total_corrections }} correction{{ 's' if feedback_stats.total_corrections != 1 }} saved &bull;
                     {{ feedback_stats.total_keywords }} keyword{{ 's' if feedback_stats.total_keywords != 1 }} learned
                 </p>
@@ -59,10 +75,21 @@
     </div>
 
     <script>
+        let _timerInterval = null;
+
         document.getElementById("analyse-form").addEventListener("submit", function () {
             document.getElementById("analyse-btn").disabled = true;
-            document.getElementById("analyse-btn").textContent = "Working…";
+            document.getElementById("analyse-btn").textContent = "Working\u2026";
             document.getElementById("loading").classList.remove("hidden");
+
+            // Start elapsed timer
+            const start = Date.now();
+            _timerInterval = setInterval(function () {
+                const s = Math.floor((Date.now() - start) / 1000);
+                const m = Math.floor(s / 60);
+                const sec = String(s % 60).padStart(2, '0');
+                document.getElementById('elapsed').textContent = m + ':' + sec;
+            }, 1000);
         });
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results &mdash; YouTube Comment Mood Check</title>
+    <title>Results &mdash; YouTube Reception Mood Check</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -44,19 +44,28 @@
 
         <!-- Sentiment bar chart -->
         {% if total > 0 %}
-        <div class="sentiment-bar">
+        <div class="sentiment-bar" id="sentiment-bar">
             {% if positive > 0 %}
-                <div class="bar-segment bar-positive" style="width: {{ (positive / total * 100) | round(1) }}%">
+                <div class="bar-segment bar-positive" data-filter="POSITIVE"
+                     title="{{ (positive / total * 100) | round(1) }}% positive &mdash; click to filter"
+                     onclick="applyFilter('POSITIVE')"
+                     style="width: {{ (positive / total * 100) | round(1) }}%">
                     {{ (positive / total * 100) | round(1) }}%
                 </div>
             {% endif %}
             {% if neutral > 0 %}
-                <div class="bar-segment bar-neutral" style="width: {{ (neutral / total * 100) | round(1) }}%">
+                <div class="bar-segment bar-neutral" data-filter="NEUTRAL"
+                     title="{{ (neutral / total * 100) | round(1) }}% neutral &mdash; click to filter"
+                     onclick="applyFilter('NEUTRAL')"
+                     style="width: {{ (neutral / total * 100) | round(1) }}%">
                     {{ (neutral / total * 100) | round(1) }}%
                 </div>
             {% endif %}
             {% if negative > 0 %}
-                <div class="bar-segment bar-negative" style="width: {{ (negative / total * 100) | round(1) }}%">
+                <div class="bar-segment bar-negative" data-filter="NEGATIVE"
+                     title="{{ (negative / total * 100) | round(1) }}% negative &mdash; click to filter"
+                     onclick="applyFilter('NEGATIVE')"
+                     style="width: {{ (negative / total * 100) | round(1) }}%">
                     {{ (negative / total * 100) | round(1) }}%
                 </div>
             {% endif %}
@@ -101,8 +110,13 @@
             <a href="{{ url_for('index') }}" class="btn">&#8592; Analyse Another Video</a>
         </div>
 
-        <footer>
-            <p>Built with Flask &amp; Selenium &bull; Sentiment by RoBERTa + your feedback</p>
+        <footer class="site-footer">
+            <p>&copy; 2026 YouTube Reception Mood Check</p>
+            <nav class="footer-links">
+                <a href="{{ url_for('about') }}">About</a>
+                <span class="sep">&bull;</span>
+                <a href="{{ url_for('privacy') }}">Terms &amp; Privacy</a>
+            </nav>
         </footer>
     </div>
 
@@ -175,9 +189,16 @@
         function applyFilter(filter) {
             currentFilter = filter;
 
-            // Toggle active button
+            // Sync filter buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+
+            // Sync bar segments
+            document.querySelectorAll('.bar-segment').forEach(seg => {
+                const match = filter === 'ALL' || seg.dataset.filter === filter;
+                seg.classList.toggle('bar-dimmed', !match);
+                seg.classList.toggle('bar-selected', match && filter !== 'ALL');
             });
 
             // Show / hide cards
