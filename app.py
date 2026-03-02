@@ -3,8 +3,9 @@ from scraper import scrape_comments
 from analyzer import analyse_comments
 from feedback import save_correction, get_stats
 
-app = Flask(__name__)
-app.secret_key = "yt-mood-check-secret"
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile("config.py", silent=True)          # loads instance/config.py
+app.secret_key = app.config.get("SECRET_KEY", "yt-mood-check-secret")
 
 
 @app.route("/", methods=["GET"])
