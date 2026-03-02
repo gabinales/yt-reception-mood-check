@@ -153,46 +153,6 @@ On Hugging Face Spaces, set `FEEDBACK_DB` to `/data/feedback.db` and enable **Pe
 
 ---
 
-## Deploying to Hugging Face Spaces (free tier)
-
-1. **Create a Space** — go to [huggingface.co/spaces](https://huggingface.co/spaces), click **Create new Space**, and choose **Docker** as the SDK.
-2. **Push your repository** — connect your GitHub repo or push directly with the HF git remote. The `Dockerfile` at the repo root is picked up automatically.
-3. **Enable Persistent Storage** — in the Space settings, turn on **Persistent Storage**. This mounts a volume at `/data` where `feedback.db` lives and survives redeploys.
-4. **Set the environment variable** — in Space settings → *Variables and secrets*, add:
-   ```
-   FEEDBACK_DB=/data/feedback.db
-   ```
-5. HF Spaces builds the Docker image (includes the ~1.1 GB model download) and deploys it. The build takes a few minutes; once live, cold starts are fast because the model is baked into the image.
-
-**Required files (already included):**
-
-```dockerfile
-# Dockerfile
-FROM python:3.10-slim
-WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN python -c "from transformers import pipeline; \
-    pipeline('sentiment-analysis', model='cardiffnlp/twitter-xlm-roberta-base-sentiment-multilingual')"
-COPY . .
-EXPOSE 7860
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:7860", "--timeout", "600", "--workers", "1"]
-```
-
----
-
-## Sentiment Results
-
-| Sentiment | Card colour  |
-|-----------|-------------|
-| Positive  | 🟢 Green    |
-| Negative  | 🔴 Red      |
-| Neutral   | ⚪ Gray     |
-
----
-
 ## Limitations
 
 - Scraping speed depends on internet connection and video comment count.
