@@ -15,7 +15,6 @@ model's confidence is low.
 Using SQLite instead of a JSON file gives us:
 - Atomic writes (no corruption on concurrent requests)
 - Efficient lookups even with thousands of corrections
-- Compatibility with Railway / Render persistent volumes
 """
 
 import os
@@ -23,15 +22,13 @@ import re
 import sqlite3
 from pathlib import Path
 
-# Allow overriding the DB path via env var (useful for Railway volumes).
-# Falls back to /data/feedback.db if the Railway mount exists, else local.
 def _resolve_db_path() -> Path:
     env = os.environ.get("FEEDBACK_DB")
     if env:
         return Path(env)
-    railway_mount = Path("/data")
-    if railway_mount.is_dir():
-        return railway_mount / "feedback.db"
+    data_mount = Path("/data")
+    if data_mount.is_dir():
+        return data_mount / "feedback.db"
     return Path(__file__).parent / "feedback.db"
 
 _DB_PATH = _resolve_db_path()
